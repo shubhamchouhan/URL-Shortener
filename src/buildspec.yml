@@ -11,7 +11,7 @@ phases:
   pre_build:
     commands:
       - pip install pytest requests
-      - pip install python:3.8-slim-buster
+      - pip install python
       - echo "[+] Running tests..."
   build:
     commands:
