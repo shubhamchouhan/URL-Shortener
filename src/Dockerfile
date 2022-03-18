@@ -1,9 +1,6 @@
-FROM python:3
-
- ADD apps.py /
- 
- RUN pip install pystrich
- 
- CMD [ "python", "./apps.py" ]
- 
- RUN docker build -t URL-Shortner
+FROM python:3.8-alpine
+RUN mkdir /app
+ADD . /app
+WORKDIR /app
+RUN pip install pystrich
+CMD ["python", "app.py"]
