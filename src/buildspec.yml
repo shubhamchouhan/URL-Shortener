@@ -1,21 +1,28 @@
-# Buildspec Reference Doc: https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html
-
 version: 0.2
 
 phases:
   install:
-    commands:
-      - echo "[+] Scanning for security vulnerability within dependencies"
-      # - pipenv check (if pipenv is installed and a Pipfile is in place)
-      # - Alternatively: https://www.owasp.org/index.php/OWASP_Dependency_Check
+    runtime-versions:
+      docker: 18
   pre_build:
     commands:
-      - pip install pytest requests
-      - echo "[+] Running tests..."
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - ls -l
+      - pwd
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - REPOSITORY_URI=public.ecr.aws/q0q1k1q6/demo-registry
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
-      - echo "[+] Installing dependencies...."
-      - docker build . -t my-url-app
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
-      - echo "SAM packaging completed on `date`"
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
