@@ -1,23 +1,12 @@
-FROM node:10
+# syntax=docker/dockerfile:1
 
-# Create app directory
-WORKDIR /usr/src/app
-ENV PORT 8080
-EXPOSE 8080
+FROM python:3.8-slim-buster
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
+WORKDIR /app
 
-RUN npm install
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
 
-#copy our source bundle into the container
 COPY . .
 
-#build the app
-RUN npm run build:prod
-
-
-#this command starts the server
-CMD ["npm","run","start"]
+CMD [ "python3", "-m" , "django", "run", "--host=0.0.0.0"]
